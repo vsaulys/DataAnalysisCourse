@@ -1,8 +1,5 @@
-
 .Rhistory
-
 .Rproj.user/*
-
 *.pper
-
 .Rproj.user
+.DS_Store
