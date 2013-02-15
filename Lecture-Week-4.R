@@ -191,9 +191,162 @@ sampleLm4$coeff
 
 confint(sampleLm4,level=0.95)
 
+#
 # Lecture: P-values
-# ------------------------------------------
+#--------------------------------------------
 
+library(UsingR)
+data(galton)
+
+plot(galton$parent,galton$child,pch=19,col="blue")
+
+lm1 <- lm(galton$child ~ galton$parent)
+abline(lm1,col="red",lwd=3)
+
+x <- seq(-20,20,length=100)
+plot(x,dt(x,df=(928-2)), col='blue', lwd=3, type='l')
+
+arrows(summary(lm1)$coeff[2,3],0.25,summary(lm1)$coeff[2,3],0,col='red', lwd=4)
+
+summary(lm1)
+
+set.seed(9898324)
+yValues <- rnorm(10)
+xValues <- rnorm(10)
+
+lm2 <- lm(yValues ~ xValues)
+summary(lm2)
+
+x <- seq(-5,5,length=100)
+plot(x,dt(x,df=(10-2)),col="blue",lwd=3,type="l")
+arrows(summary(lm2)$coeff[2,3],0.25,summary(lm2)$coeff[2,3],0,col="red",lwd=4)
+
+xCoords <- seq(-5,5,length=100)
+plot(xCoords,dt(xCoords,df=(10-2)),col="blue",lwd=3,type="l")
+xSequence <- c(seq(summary(lm2)$coeff[2,3],5,length=10),summary(lm2)$coeff[2,3])
+ySequence <- c(dt(seq(summary(lm2)$coeff[2,3],5,length=10),df=8),0)
+polygon(xSequence,ySequence,col="red"); polygon(-xSequence,ySequence,col="red")
+
+# p-value is up to  1
+# p-value is area under curve left/right of distribution
+# e.g. if the value fell in the heart of the distribution, not significant
+# if way to a side, its significant
+
+set.seed(8323)
+pValues <- rep(NA,100)
+for(i in 1:100){
+  xValues <- rnorm(100)
+  yValues <- 0.2*xValues + rnorm(100)
+  pValues[i] <- summary(lm(yValues ~ xValues))$coeff[2,4]
+}
+hist(pValues,col="blue",main="",freq=F)
+abline(h=1,col="red",lwd=3)
+
+summary(lm(galton$child ~ galton$parent))$coeff
+
+#
+# Lecture: factor variables
+#--------------------------------------------
+
+library(ggplot2)
+
+download.file("http://www.rossmanchance.com/iscam2/data/movies03RT.txt",destfile="./data/movies.txt")
+movies <- read.table("./data/movies.txt",sep="\t",header=T,quote="")
+head(movies)
+
+plot(movies$score ~ jitter(as.numeric(movies$rating)),col="blue",xaxt="n",pch=19)
+axis(side=1,at=unique(as.numeric(movies$rating)),labels=unique(movies$rating))
+
+meanRatings <- tapply(movies$score, movies$rating, mean)
+points(1:4,meanRatings,col="red",pch="-",cex=5)
+
+ggplot(data=movies, aes(x=rating, y=score)) + geom_boxplot()
+
+lm1 <- lm(movies$score ~ as.factor(movies$rating))
+summary(lm1)
+
+movies$rating <- factor(movies$rating)
+
+lm1 <- lm(formula=score ~ rating, data=movies)
+summary(lm1)
+
+plot(movies$score ~ jitter(as.numeric(movies$rating)),col="blue",xaxt="n",pch=19)
+axis(side=1,at=unique(as.numeric(movies$rating)),labels=unique(movies$rating))
+points(1:4,lm1$coeff[1] + c(0,lm1$coeff[2:4]),col="red",pch="-",cex=5)
+
+confint(lm1)
+
+movies$rating <- relevel(factor(movies$rating), ref='R')
+
+lm2 <- lm(formula=score ~ rating, data=movies)
+summary(lm2)
+confint(lm2)
+
+
+
+movies$rating <- factor(movies$rating)
+
+lm1 <- lm(formula=score ~ rating, data=movies)
+summary(lm1)
+anova(lm1)
+
+
+gMovies <- movies[movies$rating=="G",]; xVals <- seq(0.2,0.8,length=4)
+plot(xVals,gMovies$score,ylab="Score",xaxt="n",xlim=c(0,1),pch=19)
+abline(h=mean(gMovies$score),col="blue",lwd=3); abline(h=mean(movies$score),col="red",lwd=3)
+segments(xVals+0.01,rep(mean(gMovies$score),length(xVals)),xVals+0.01,
+         rep(mean(movies$score),length(xVals)),col="red",lwd=2)
+segments(xVals-0.01,gMovies$score,xVals-0.01,rep(mean(gMovies$score),length(xVals)),col="blue",lwd=2)
+
+aov1 <- aov(formula=score ~ rating, data=movies)
+TukeyHSD(aov1)
+
+# Lecture: multiple regression
+# ----------------------------------------------
+
+download.file("http://apps.who.int/gho/athena/data/GHO/WHOSIS_000008.csv?profile=text&filter=COUNTRY:*;SEX:",
+              destfile="./data/hunger.csv")
+hunger <- read.csv("./data/hunger.csv")
+hunger <- hunger[hunger$Sex!="Both sexes",]
+head(hunger)
+str(hunger)
+
+lm1 <- lm(formula= Numeric ~ Year, data=hunger)
+
+ggplot(data=hunger, aes(x=Year, y=Numeric, color=Sex)) + geom_point()
+
+
+lmBoth <- lm(formula= Numeric ~ Year + Sex, data=hunger)
+summary(lmBoth)
+
+
+lmBoth <- lm(formula= Numeric ~ Year + Sex + Sex*Year, data=hunger)
+summary(lmBoth)
+
+# Lecture: Regression in the real world
+#---------------------------------------------------------------
+
+download.file("http://apps.who.int/gho/athena/data/GHO/WHOSIS_000008.csv?profile=text&filter=COUNTRY:*;SEX:*","./data/hunger.csv",method="curl")
+hunger <- read.csv("./data/hunger.csv")
+hunger <- hunger[hunger$Sex!="Both sexes",]
+head(hunger)
+
+ggplot(data=hunger, aes(x=Year, y=Numeric, color=WHO.region)) + geom_point()
+
+anova(lm(Year~WHO.region, data=hunger))
+
+anova(lm(Numeric~WHO.region, data=hunger))
+
+ggplot(data=hunger, aes(x=Year, y=Numeric, color=WHO.region)) + 
+  geom_point()
+
+
+download.file("http://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data","./data/income.incomeData <- read.csv("./data/income.csv",header=FALSE)
+              income <- incomeData[,3]
+              age <- incomeData[,1]
+              
+              
+              
 
 
 
