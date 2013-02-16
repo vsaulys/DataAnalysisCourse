@@ -1,10 +1,5 @@
 .Rhistory
 .Rproj.user/*
-*.pper
-<<<<<<< HEAD
-
-.Rproj.user
-=======
 .Rproj.user
 .DS_Store
->>>>>>> 9b0df20ff45ef3810954d6d8500001b12c35a695
+exampleProject
