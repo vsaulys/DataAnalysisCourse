@@ -6,7 +6,9 @@
 
 require(ggplot2)
 
+#
 # Lecture: ANOVA with multiple factors
+# -------------------------------------------------------------
 
 download.file("http://www.rossmanchance.com/iscam2/data/movies03RT.txt", destfile="./data/movies.txt")
 movies <- read.table("./data/movies.txt",sep="\t",header=T,quote="")
@@ -38,7 +40,10 @@ aovObject4 <- aov(f4, data=movies)
 aovObject4
 summary(aovObject4)
 
+#
 # Lecture: Binary Outcomes
+# -------------------------------------------------------------
+
 download.file("https://dl.dropbox.com/u/7710864/data/ravensData.rda", destfile="./data/ravensData.rda", method="curl")
 load("./data/ravensData.rda")
 head(ravensData)
@@ -61,7 +66,10 @@ exp(confint(logRegRavens))
 
 anova(logRegRavens, test='Chisq')
 
+#
 # Lecture: Couting Outcomes
+# -------------------------------------------------------------
+
 download.file("https://dl.dropbox.com/u/7710864/data/gaData.rda", destfile="./data/gaData.rda", method='curl')
 load("./data/gaData.rda")
 gaData$julian <- julian(gaData$date)
@@ -112,6 +120,122 @@ glm2 <- glm(simplystats ~ julian(date),offset=log(visits+1), family="poisson", d
 plot(julian(gaData$date), gaData$simplystats/(gaData$visits+1), col="grey", xlab="Date",
      ylab="Fitted Rates",pch=19)
 lines(julian(gaData$date),glm2$fitted/(gaData$visits+1),col="blue",lwd=3)
+
+#
+# Lecture: Model checking and selection
+# -------------------------------------------------------------
+
+set.seed(3433); par(mfrow=c(1,2))
+data <- rnorm(100,mean=seq(0,3,length=100),sd=seq(0.1,3,length=100))
+lm1 <- lm(data ~ seq(0,3,length=100))
+plot(seq(0,3,length=100),data,pch=19,col="grey")
+abline(lm1,col="red",lwd=3)
+plot(seq(0,3,length=100),lm1$residuals,,pch=19,col="grey")
+abline(c(0,0),col="red",lwd=3)
+
+set.seed(3433)
+par(mfrow=c(1,2))
+data <- rnorm(100,mean=seq(0,3,length=100),sd=seq(0.1,3,length=1))
+                                                                                     
+lm1 <- lm(data ~ seq(0,3,length=100))
+vcovHC(lm1)
+summary(lm1)$cov.unscaled
+
+set.seed(3433)
+par(mfrow=c(1,2))
+data <- rnorm(100,mean=seq(0,3,length=100)^3,sd=2)
+lm1 <- lm(data ~ seq(0,3,length=100))
+plot(seq(0,3,length=100),data,pch=19,col="grey")
+abline(lm1,col="red",lwd=3)
+plot(seq(0,3,length=100),lm1$residuals,,pch=19,col="grey")
+abline(c(0,0),col="red",lwd=3)
+
+set.seed(3433); par(mfrow=c(1,3))
+z <- rep(c(-0.5,0.5),50)
+data <- rnorm(100,mean=(seq(0,3,length=100) + z),sd=seq(0.1,3,length=100))
+lm1 <- lm(data ~ seq(0,3,length=100))
+plot(seq(0,3,length=100),data,pch=19,col=((z>0)+3))
+abline(lm1,col="red",lwd=3)
+plot(seq(0,3,length=100),lm1$residuals,pch=19,col=((z>0)+3))
+abline(c(0,0),col="red",lwd=3)
+boxplot(lm1$residuals ~ z,col = ((z>0)+3) )
+
+set.seed(343)
+par(mfrow=c(1,2))
+betahat <- rep(NA,100)
+x <- seq(0,3,length=100)
+y <- rcauchy(100)
+lm1 <- lm(y ~ x)
+
+plot(x,y,pch=19,col="blue")
+abline(lm1,col="red",lwd=3)
+for(i in 1:length(data)){betahat[i] <- lm(y[-i] ~ x[-i])$coeff[2]}
+plot(betahat - lm1$coeff[2],col="blue",pch=19)
+abline(c(0,0),col="red",lwd=3)
+
+require(MASS)
+
+set.seed(343)
+x <- seq(0,3,length=100)
+y <- rcauchy(100);
+lm1 <- lm(y ~ x)
+rlm1 <- rlm(y ~ x)
+lm1$coeff
+rlm1$coeff
+
+# pg 14
+par(mfrow=c(1,2))
+plot(x,y,pch=19,col="grey")
+lines(x,lm1$fitted,col="blue",lwd=3)
+lines(x,rlm1$fitted,col="green",lwd=3)
+plot(x,y,pch=19,col="grey",ylim=c(-5,5),main="Zoomed In")
+lines(x,lm1$fitted,col="blue",lwd=3)
+lines(x,rlm1$fitted,col="green",lwd=3)
+
+# pg 15
+set.seed(343)
+par(mfrow=c(1,2))
+x <- seq(0,3,length=100)
+y <- rnorm(100)
+lm1 <- lm(y ~ x)
+plot(lm1)
+
+# pg 20
+download.file("http://www.rossmanchance.com/iscam2/data/movies03RT.txt",destfile="./data/movies.txt", method='curl')
+movies <- read.table("./data/movies.txt",sep="\t",header=T,quote="")
+head(movies)
+
+# pg 21
+movies <- movies[,-1]
+lm1 <- lm(score ~ .,data=movies)
+aicFormula <- step(lm1)
+
+aicFormula
+
+# pg 23
+library(leaps)
+
+regSub <- regsubsets(score ~ ., data=movies)
+plot(regSub)
+
+# pg 24
+library(BMA)
+
+bicglm1 <- bic.glm(score ~., data=movies, glm.family='gaussian')
+print(bicglm1)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
