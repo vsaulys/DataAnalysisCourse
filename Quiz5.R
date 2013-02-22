@@ -20,22 +20,34 @@ log(.2/(1-.2))
 
 # Question 3
 library(glm2)
-data(crabs)
 
+data(crabs, package='glm2')
 summary(crabs)
 
 f <- Satellites ~ Width
 pModel <- glm(f, data=crabs, family='poisson')
 
 summary(pModel)
-pModel$coefficients
+
+# remember the exp!
+exp(pModel$coefficients)
 
 # Question 4
+data(crabs, package='glm2')
+summary(crabs)
 
+f <- Satellites ~ Width
+pModel <- glm(f, data=crabs, family='poisson')
+summary(pModel)
+
+p <- data.frame(Width=22)
+
+# remember the exp!
+exp(predict(pModel, newdata=p))
 
 # Question 5
-library(MASS)
-data(quine) 
+
+data(quine, package='MASS')
 lm1 = lm(log(Days + 2.5) ~ . , data=quine)
 
 step1 <- step(lm1)
