@@ -69,6 +69,14 @@ lm1 <- lm( loansData$Interest.Rate ~ FICO.Range, data=loansData)
 
 summary(lm1)
 
+
+# step?
+lmS <- lm(Interest.Rate ~ ., data=loansData)
+summary(lmS)
+
+step(lmS)
+
+
 # How does it perform?
 lf1 <- fortify(lm1)
 
