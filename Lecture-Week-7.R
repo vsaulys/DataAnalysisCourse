@@ -7,7 +7,7 @@ require(ggplot2)
 # ----------------------------------------------------
 
 download.file("https://spark-public.s3.amazonaws.com/dataanalysis/cd4.data", 
-              destfile="./data/cd4.data", method="curl")
+              destfile="./data/cd4.data")
 cd4Data <- read.table("./data/cd4.data",
                       col.names=c("time", "cd4", "age", "packs", "drugs", "sex",
                                   "cesd", "id")) 
@@ -144,8 +144,11 @@ boot.ci(results)
 resid <- rstudent(nuke.lm)
 fit0 <- fitted(lm(log(cost) ~ 1,data=nuclear)) 
 newNuc <- cbind(nuclear,resid=resid,fit0=fit0) 
+
 bs <- function(data, indices) {
-  return(coef(glm(data$fit0 + data$resid[indices] ~ data$date,data=data))) }
+  return(coef(glm(data$fit0 + data$resid[indices] ~ data$date,data=data))) 
+}
+
 results <- boot(data=newNuc, statistic=bs, R=1000)
 
 plot(density(results$t[,2]),lwd=3,col="blue") 
