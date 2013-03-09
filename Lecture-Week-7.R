@@ -7,7 +7,7 @@ require(ggplot2)
 # ----------------------------------------------------
 
 download.file("https://spark-public.s3.amazonaws.com/dataanalysis/cd4.data", 
-              destfile="./data/cd4.data")
+              destfile="./data/cd4.data", method='curl')
 cd4Data <- read.table("./data/cd4.data",
                       col.names=c("time", "cd4", "age", "packs", "drugs", "sex",
                                   "cesd", "id")) 
