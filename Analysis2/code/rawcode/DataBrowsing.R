@@ -4,7 +4,8 @@
 
 require (plyr)
 require (ggplot2)
-require(grid)
+require (grid)
+
 
 #'
 #' Function for helping layout grid graph elements
@@ -30,7 +31,28 @@ summary(samsungData$activity)
 samsungData$activity <- factor(samsungData$activity)
 summary(samsungData$activity)
 
+# fix column names
+names(samsungData) <- gsub("-", ".", names(samsungData))
+names(samsungData) <- gsub(",", ".", names(samsungData))
+names(samsungData) <- gsub("\\(", ".", names(samsungData))
+names(samsungData) <- gsub("\\)", ".", names(samsungData))
 
+# Training set
+trainData <- subset(samsungData, subject %in% c(1, 3, 5, 6))
+testData <- subset(samsungData, subject %in% c(27, 28, 29, 30))
+
+nrow(trainData)
+nrow(testData)
+
+# library(rattle)
+# rattle()
+
+# classification: randomForest
+
+modelRF <- randomForest(formula=activity~., data=trainData, ntree=500, mtry=23, importance=TRUE, replace=FALSE)
+
+modelRF
+getTree(modelRF)
 
 
 
