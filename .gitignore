@@ -4,3 +4,6 @@
 .DS_Store
 exampleProject
 Thumbs.db
+.RData
+Analysis2/writing/*
+*.png
